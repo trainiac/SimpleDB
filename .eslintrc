@@ -140,7 +140,7 @@
                 "argsIgnorePattern": "next"
             }
         ],
-        "no-use-before-define": "error",
+        "no-use-before-define": ["error", { "functions": false, "classes": true }],
 
         // Node.js and CommonJS
         "callback-return": "error",

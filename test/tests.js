@@ -26,29 +26,33 @@ describe('SimpleDB commands', function() {
     });
 
     it('should set a value', function() {
+        var internals;
         processInput([ 'SET foo 3', 'GET foo' ].join('\n'));
         messages.should.eql([ 'SET foo 3', 'GET foo', '> 3' ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [],
-                db: true
-            }
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({
+            foo: '3'
         });
-        SimpleDB._db.should.eql({
+        internals.currentValues.should.eql({
             foo: '3'
         });
     });
 
     it('should unset a value', function() {
+        var internals;
         processInput([ 'SET foo 3', 'UNSET foo' ].join('\n'));
         messages.should.eql([ 'SET foo 3', 'UNSET foo' ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
+        internals.currentValues.should.eql({});
     });
 
     it('should count values', function() {
+        var internals;
         processInput([
             'NUMEQUALTO 3',
             'SET foo 3',
@@ -65,91 +69,105 @@ describe('SimpleDB commands', function() {
             'NUMEQUALTO 4',
             '> 0'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [],
-                db: true
-            }
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({
+            foo: '3'
         });
-        SimpleDB._db.should.eql({
+        internals.currentValues.should.eql({
             foo: '3'
         });
     });
 
     it('should do nothing on END', function() {
+        var internals;
         processInput([ 'END' ].join('\n'));
         messages.should.eql([
             'END'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
     });
 
     it('should output NO TRANSACTION if ROLLBACK called with no transactions', function() {
+        var internals;
         processInput([ 'ROLLBACK' ].join('\n'));
         messages.should.eql([
             'ROLLBACK',
             'NO TRANSACTION'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
+        internals.currentValues.should.eql({});
     });
 
     it('should output NO TRANSACTION if COMMIT called with no transactions', function() {
+        var internals;
         processInput([ 'COMMIT' ].join('\n'));
         messages.should.eql([
             'COMMIT',
             'NO TRANSACTION'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
+        internals.currentValues.should.eql({});
     });
 
     it('should create new transaction with BEGIN command', function() {
+        var internals;
         processInput([ 'BEGIN' ].join('\n'));
         messages.should.eql([
             'BEGIN'
         ]);
-        SimpleDB._transactions.should.eql([ {} ]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([ {} ]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
+        internals.currentValues.should.eql({});
     });
 
     it('should remove a transaction with ROLLBACK command', function() {
+        var internals;
         processInput([ 'BEGIN', 'ROLLBACK' ].join('\n'));
         messages.should.eql([
             'BEGIN',
             'ROLLBACK'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
+        internals.currentValues.should.eql({});
     });
 
     it('should commit a transaction with COMMIT command', function() {
+        var internals;
         processInput([ 'BEGIN', 'SET foo 3', 'COMMIT' ].join('\n'));
         messages.should.eql([
             'BEGIN',
             'SET foo 3',
             'COMMIT'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [],
-                db: true
-            }
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({
+            foo: '3'
         });
-        SimpleDB._db.should.eql({
+        internals.currentValues.should.eql({
             foo: '3'
         });
     });
 
     it('should commit a transaction with existing values with COMMIT command', function() {
+        var internals;
         processInput([
             'SET foo 3',
             'SET bar 4',
@@ -164,24 +182,21 @@ describe('SimpleDB commands', function() {
             'SET foo 2',
             'COMMIT'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [],
-                db: true
-            },
-            bar: {
-                transactions: [],
-                db: true
-            }
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({
+            foo: '2',
+            bar: '4'
         });
-        SimpleDB._db.should.eql({
+        internals.currentValues.should.eql({
             foo: '2',
             bar: '4'
         });
     });
 
     it('should rollback updates to existing value with ROLLBACK command', function() {
+        var internals;
         processInput([ 'SET foo 2', 'BEGIN', 'SET foo 3', 'ROLLBACK' ].join('\n'));
         messages.should.eql([
             'SET foo 2',
@@ -189,31 +204,34 @@ describe('SimpleDB commands', function() {
             'SET foo 3',
             'ROLLBACK'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [],
-                db: true
-            }
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({
+            foo: '2'
         });
-        SimpleDB._db.should.eql({
+        internals.currentValues.should.eql({
             foo: '2'
         });
     });
 
     it('should rollback updates with ROLLBACK command', function() {
+        var internals;
         processInput([ 'BEGIN', 'SET foo 3', 'ROLLBACK' ].join('\n'));
         messages.should.eql([
             'BEGIN',
             'SET foo 3',
             'ROLLBACK'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({});
-        SimpleDB._db.should.eql({});
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({});
+        internals.currentValues.should.eql({});
     });
 
     it('should get value from most recent transaction', function() {
+        var internals;
         processInput([ 'SET foo 2', 'BEGIN', 'SET foo 3', 'GET foo' ].join('\n'));
         messages.should.eql([
             'SET foo 2',
@@ -222,19 +240,19 @@ describe('SimpleDB commands', function() {
             'GET foo',
             '> 3'
         ]);
-        SimpleDB._transactions.should.eql([ { foo: '3' } ]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [ 0 ],
-                db: true
-            }
-        });
-        SimpleDB._db.should.eql({
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([ { foo: '3' } ]);
+        internals.transactionIndicesByName.should.eql({ foo: [ 0 ] });
+        internals.db.should.eql({
             foo: '2'
+        });
+        internals.currentValues.should.eql({
+            foo: '3'
         });
     });
 
     it('SET should be idempotent within transactions', function() {
+        var internals;
         processInput([ 'SET foo 2', 'BEGIN', 'SET foo 3', 'SET foo 3' ].join('\n'));
         messages.should.eql([
             'SET foo 2',
@@ -242,15 +260,14 @@ describe('SimpleDB commands', function() {
             'SET foo 3',
             'SET foo 3'
         ]);
-        SimpleDB._transactions.should.eql([ { foo: '3' } ]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [ 0 ],
-                db: true
-            }
-        });
-        SimpleDB._db.should.eql({
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([ { foo: '3' } ]);
+        internals.transactionIndicesByName.should.eql({ foo: [ 0 ] });
+        internals.db.should.eql({
             foo: '2'
+        });
+        internals.currentValues.should.eql({
+            foo: '3'
         });
     });
 
@@ -268,6 +285,7 @@ describe('SimpleDB commands', function() {
         'should support sets, gets, unsets, and numequaltos',
         'within nested transactions and be able to rollback those transactions'
     ].join(' '), function() {
+        var internals;
         processInput([
             'SET bar 2', 'SET baz 3', 'SET quw 4',
             'BEGIN',
@@ -294,34 +312,28 @@ describe('SimpleDB commands', function() {
             'GET baz', '> 4',
             'GET quw', '> 5'
         ]);
-        SimpleDB._transactions.should.eql([ {
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([ {
             foo: '1',
             baz: '4'
         }, {
             quw: '5'
         } ]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [ 0 ],
-                db: false
-            },
-            bar: {
-                transactions: [],
-                db: true
-            },
-            baz: {
-                transactions: [ 0 ],
-                db: true
-            },
-            quw: {
-                transactions: [ 1 ],
-                db: true
-            }
+        internals.transactionIndicesByName.should.eql({
+            foo: [ 0 ],
+            baz: [ 0 ],
+            quw: [ 1 ]
         });
-        SimpleDB._db.should.eql({
+        internals.db.should.eql({
             bar: '2',
             baz: '3',
             quw: '4'
+        });
+        internals.currentValues.should.eql({
+            foo: '1',
+            bar: '2',
+            baz: '4',
+            quw: '5'
         });
     });
 
@@ -329,6 +341,7 @@ describe('SimpleDB commands', function() {
         'should support sets, gets, unsets, and numequaltos',
         'within nested transactions and be able to commit those transactions'
     ].join(' '), function() {
+        var internals;
         processInput([
             'SET bar 2', 'SET baz 3', 'SET quw 4',
             'BEGIN',
@@ -355,25 +368,67 @@ describe('SimpleDB commands', function() {
             'GET baz', '> 4',
             'GET quw', '> 5'
         ]);
-        SimpleDB._transactions.should.eql([]);
-        SimpleDB._references.should.eql({
-            foo: {
-                transactions: [],
-                db: true
-            },
-            baz: {
-                transactions: [],
-                db: true
-            },
-            quw: {
-                transactions: [],
-                db: true
-            }
-        });
-        SimpleDB._db.should.eql({
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([]);
+        internals.transactionIndicesByName.should.eql({});
+        internals.db.should.eql({
             foo: '1',
             baz: '4',
             quw: '5'
         });
+        internals.currentValues.should.eql({
+            foo: '1',
+            baz: '4',
+            quw: '5'
+        });
+    });
+
+    it('should rollback a variable to the last transaction value when previous transactions exist', function() {
+        var internals;
+        processInput([
+            'SET foo 2',
+            'BEGIN',
+            'SET foo 3',
+            'BEGIN',
+            'SET foo 4',
+            'ROLLBACK',
+            'GET foo'
+        ].join('\n'));
+        messages.should.eql([
+            'SET foo 2',
+            'BEGIN',
+            'SET foo 3',
+            'BEGIN',
+            'SET foo 4',
+            'ROLLBACK',
+            'GET foo',
+            '> 3'
+        ]);
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([ { foo: '3' } ]);
+        internals.transactionIndicesByName.should.eql({ foo: [ 0 ] });
+        internals.db.should.eql({
+            foo: '2'
+        });
+        internals.currentValues.should.eql({
+            foo: '3'
+        });
+    });
+
+    it('should store null when a name is unset within a transaction', function() {
+        var internals;
+        processInput([ 'SET foo 2', 'BEGIN', 'UNSET foo 3' ].join('\n'));
+        messages.should.eql([
+            'SET foo 2',
+            'BEGIN',
+            'UNSET foo 3'
+        ]);
+        internals = SimpleDB.inspect();
+        internals.transactions.should.eql([ { foo: null } ]);
+        internals.transactionIndicesByName.should.eql({ foo: [ 0 ] });
+        internals.db.should.eql({
+            foo: '2'
+        });
+        internals.currentValues.should.eql({});
     });
 });

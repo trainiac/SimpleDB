@@ -82,6 +82,22 @@ var SimpleDB = {
     _currentValues: {},
 
     /**
+       An object where the keys are existing values being stored and the values are the
+       the number of variable names that have that corresponding value.
+
+       example:
+
+       {
+           1: 3,    There are three variable names with a value of 1 and two variable
+           2: 2     names with a value of 2.
+       }
+
+       @type {Object}
+       @private
+    */
+    _valuesCount: {},
+
+    /**
        Creates a new empty transaction and appends it to the transactions array.
 
        @function begin
@@ -205,25 +221,16 @@ var SimpleDB = {
     },
 
     /**
-       Iterates through the currentValues for all variable names counting the
-       number of variables names that have a given value.
+       Returns the number of variables equal to the given value
 
        @function numEqualTo
        @public
-       @param {string} value The value to be counted
+       @param {string} value The value to find the count for
        @returns {number} The number of occurrences of the given value
     */
     numEqualTo: function(value) {
-        var num = 0;
-        var name;
-
-        for (name in this._currentValues) {
-            if (this._currentValues[name] === value) {
-                num += 1;
-            }
-        }
-
-        return num;
+        var num = this._valuesCount[value];
+        return num === undefined ? 0 : num;
     },
 
     /**
@@ -238,6 +245,7 @@ var SimpleDB = {
         this._transactionIndicesByName = {};
         this._db = {};
         this._currentValues = {};
+        this._valuesCount = {};
     },
 
     /**
@@ -252,7 +260,8 @@ var SimpleDB = {
             transactions: this._transactions,
             transactionIndicesByName: this._transactionIndicesByName,
             db: this._db,
-            currentValues: this._currentValues
+            currentValues: this._currentValues,
+            valuesCount: this._valuesCount
         }
     },
 
@@ -317,19 +326,37 @@ var SimpleDB = {
 
     /**
        @function _setToCurrentValues
-       @desc Sets a given name value to the currentValues.  If the value being set is null
-             this will effectively delete the name leaving nothing to store for that
-             name.
+       @desc Sets a given name value to the currentValues and updates valuesCount.
+             If the value being set is null this will effectively delete the name
+             leaving nothing to store for that name.
        @private
        @param {string} name The name of the value to be set.
        @param {string} value The value to be set.
        @returns {undefined}
     */
     _setToCurrentValues: function(name, value) {
+        var oldValue = this._currentValues[name];
+
         if (value === null) {
             delete this._currentValues[name];
         } else {
             this._currentValues[name] = value;
+            if (this._valuesCount[value] === undefined) {
+                this._valuesCount[value] = 1;
+            } else if (oldValue !== value) {
+                this._valuesCount[value] += 1
+            }
+        }
+
+        if (
+            oldValue !== undefined &&
+            this._valuesCount[oldValue] !== undefined &&
+            oldValue !== value
+        ) {
+            this._valuesCount[oldValue] -= 1
+            if (this._valuesCount[oldValue] < 1) {
+                delete this._valuesCount[oldValue];
+            }
         }
     },
 

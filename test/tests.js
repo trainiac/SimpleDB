@@ -38,6 +38,9 @@ describe('SimpleDB commands', function() {
         internals.currentValues.should.eql({
             foo: '3'
         });
+        internals.valuesCount.should.eql({
+            3: 1
+        });
     });
 
     it('should unset a value', function() {
@@ -49,6 +52,7 @@ describe('SimpleDB commands', function() {
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should count values', function() {
@@ -78,6 +82,9 @@ describe('SimpleDB commands', function() {
         internals.currentValues.should.eql({
             foo: '3'
         });
+        internals.valuesCount.should.eql({
+            3: 1
+        });
     });
 
     it('should do nothing on END', function() {
@@ -90,6 +97,7 @@ describe('SimpleDB commands', function() {
         internals.transactions.should.eql([]);
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should output NO TRANSACTION if ROLLBACK called with no transactions', function() {
@@ -104,6 +112,7 @@ describe('SimpleDB commands', function() {
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should output NO TRANSACTION if COMMIT called with no transactions', function() {
@@ -118,6 +127,7 @@ describe('SimpleDB commands', function() {
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should create new transaction with BEGIN command', function() {
@@ -131,6 +141,7 @@ describe('SimpleDB commands', function() {
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should remove a transaction with ROLLBACK command', function() {
@@ -145,6 +156,7 @@ describe('SimpleDB commands', function() {
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should commit a transaction with COMMIT command', function() {
@@ -163,6 +175,9 @@ describe('SimpleDB commands', function() {
         });
         internals.currentValues.should.eql({
             foo: '3'
+        });
+        internals.valuesCount.should.eql({
+            3: 1
         });
     });
 
@@ -193,6 +208,10 @@ describe('SimpleDB commands', function() {
             foo: '2',
             bar: '4'
         });
+        internals.valuesCount.should.eql({
+            2: 1,
+            4: 1
+        });
     });
 
     it('should rollback updates to existing value with ROLLBACK command', function() {
@@ -213,6 +232,9 @@ describe('SimpleDB commands', function() {
         internals.currentValues.should.eql({
             foo: '2'
         });
+        internals.valuesCount.should.eql({
+            2: 1
+        });
     });
 
     it('should rollback updates with ROLLBACK command', function() {
@@ -228,6 +250,7 @@ describe('SimpleDB commands', function() {
         internals.transactionIndicesByName.should.eql({});
         internals.db.should.eql({});
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 
     it('should get value from most recent transaction', function() {
@@ -249,6 +272,9 @@ describe('SimpleDB commands', function() {
         internals.currentValues.should.eql({
             foo: '3'
         });
+        internals.valuesCount.should.eql({
+            3: 1
+        });
     });
 
     it('SET should be idempotent within transactions', function() {
@@ -268,6 +294,9 @@ describe('SimpleDB commands', function() {
         });
         internals.currentValues.should.eql({
             foo: '3'
+        });
+        internals.valuesCount.should.eql({
+            3: 1
         });
     });
 
@@ -335,6 +364,12 @@ describe('SimpleDB commands', function() {
             baz: '4',
             quw: '5'
         });
+        internals.valuesCount.should.eql({
+            1: 1,
+            2: 1,
+            4: 1,
+            5: 1
+        });
     });
 
     it([
@@ -380,6 +415,11 @@ describe('SimpleDB commands', function() {
             foo: '1',
             baz: '4',
             quw: '5'
+        });
+        internals.valuesCount.should.eql({
+            1: 1,
+            4: 1,
+            5: 1
         });
     });
 
@@ -430,5 +470,6 @@ describe('SimpleDB commands', function() {
             foo: '2'
         });
         internals.currentValues.should.eql({});
+        internals.valuesCount.should.eql({});
     });
 });
